@@ -1,0 +1,8 @@
+{
+  "Gene": {
+    "references": {"A": "Gene_A", "B": "Gene_B", "D": "Gene_D"},
+    "expected": [1, 1, 1],
+    "min_pairs": 1000,
+    "max_fold": 2
+  }
+}

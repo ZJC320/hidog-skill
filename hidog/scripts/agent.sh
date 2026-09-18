@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Shared local entry point for desktop agents; forwards the original HiDOG CLI.
 set -euo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 base=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 prefix="${HOME}/.local/share/hidog"
 fail() { echo "ERROR: $*" >&2; exit 1; }
@@ -38,6 +39,12 @@ case "$action" in
     [[ "$count" -eq 2 ]] || fail "Expected two Stats reports; see $run"
     [[ -n "$(find "$run/results" -type f -name '*.xlsx' -print -quit)" ]] || fail 'Missing Excel report'
     [[ -n "$(find "$run/results" -type f -name '*.html' -print -quit)" ]] || fail 'Missing HTML report'
+    bash "$base/scripts/install-reporting.sh" "$prefix"
+    state=$(find "$run/results" -type f -name resume_state.json -print -quit)
+    [[ -n "$state" ]] || fail 'Missing completed analysis state'
+    "$prefix/reporting-1.2.0/bin/python" "$base/scripts/analysis_report.py" \
+      --run-root "$(dirname "$state")" --output "$run/skill-report"
+    "$prefix/reporting-1.2.0/bin/python" -c 'import json,sys,pathlib; p=pathlib.Path(sys.argv[1]); d=json.loads((p/"report.json").read_text()); assert d["samples"][0]["split_pairs"]==40; assert d["samples"][0]["warning"]=="LOW_READS(<1000)"; assert d["editing"][0]["frequency_percent"]==50; assert list(p.glob("editing_read_*.png"))' "$run/skill-report"
     printf 'SELFTEST PASS: Assigned=40 Modified=20 Editing_frequency=50%%\nResults: %s/results\n' "$run" | tee "$run/verification.txt"
     ;;
   check|install)
@@ -52,6 +59,16 @@ case "$action" in
   run)
     [[ -x "$launcher" ]] || fail 'Run action install first'
     exec "$launcher" "$@" ;;
+  analyze|validate)
+    python="$prefix/reporting-1.2.0/bin/python"
+    [[ -x "$launcher" && -x "$python" ]] || fail 'Run action setup first (core and reporting environment)'
+    options=()
+    [[ "$action" != validate ]] || options+=(--validate-only)
+    exec "$python" "$base/scripts/analyze.py" --launcher "$launcher" "${options[@]}" "$@" ;;
+  report)
+    python="$prefix/reporting-1.2.0/bin/python"
+    [[ -x "$python" ]] || fail 'Run action setup first'
+    exec "$python" "$base/scripts/analysis_report.py" "$@" ;;
   example)
     [[ $# -le 1 ]] || fail 'example accepts one absolute output directory'
     [[ -x "$launcher" ]] || fail 'Run action install first'
@@ -68,5 +85,5 @@ case "$action" in
       --prime_editing_pegRNA_extension_seq "$base/examples/extensions.fa" \
       --prime_editing_override_prime_edited_ref_seq "$base/examples/expected.fa" \
       --min-genotype-depth 1 --min-ratio 0 ;;
-  *) fail 'Action must be setup, check, install, run or example' ;;
+  *) fail 'Action must be setup, check, install, analyze, validate, report, run or example' ;;
 esac

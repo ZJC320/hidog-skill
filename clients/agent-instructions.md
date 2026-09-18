@@ -1,13 +1,12 @@
 ## 此客户端的本地入口
 
-本节使用随包提供的入口完成环境检查和 Windows/WSL 路径转换。第一次使用先执行 check；未安装时执行 install，再执行 example 并核对 Stats 为 40/20/50%。首次安装需要联网。以下路径相对于本 SKILL.md，运行时替换为该文件所在的真实绝对路径。
+本节使用随包提供的入口完成环境检查和 Windows/WSL 路径转换。第一次使用执行 setup，同时安装核心及报告环境并核对 40/20/50%、低深度警告和绘图自测。首次安装需要联网。以下路径相对于本 SKILL.md，运行时替换为该文件所在的真实绝对路径。
 
 Windows PowerShell：
 
 ```powershell
 & '<skill目录>\scripts\agent.ps1' -Action check
-& '<skill目录>\scripts\agent.ps1' -Action install
-& '<skill目录>\scripts\agent.ps1' -Action example
+& '<skill目录>\scripts\agent.ps1' -Action setup
 & '<skill目录>\scripts\agent.ps1' -Action run -HidogArgs @('--help')
 ```
 
@@ -15,8 +14,7 @@ Linux 或已经处于 WSL 的终端：
 
 ```bash
 bash '<skill目录>/scripts/agent.sh' check
-bash '<skill目录>/scripts/agent.sh' install
-bash '<skill目录>/scripts/agent.sh' example
+bash '<skill目录>/scripts/agent.sh' setup
 bash '<skill目录>/scripts/agent.sh' run --help
 ```
 
@@ -28,3 +26,5 @@ bash '<skill目录>/scripts/agent.sh' run --help
 - 找不到 WSL、使用 ARM/macOS、客户端没有本地执行工具或只允许云端执行时，明确报告环境不支持并停止；不要假称已分析，也不要擅自上传数据改走云端。
 - 首次安装可能持续数分钟；用客户端进程管理查看同一个安装进程，不要重复启动。下载失败保留具体错误。已有运行环境直接复用。
 - 示例结果写入用户主目录下新的 `hidog-results/example-*`；可将绝对输出目录作为 example 的唯一参数。真实实验不得沿用示例阈值。
+
+真实 paired FASTQ 分析使用 analyze（含输入检查和增强报告），参数及模式边界见 references/input-format.md。run 仅用于原 CLI 兼容调用。

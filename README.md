@@ -12,15 +12,23 @@
 
 Agent 请读取 [统一自动安装入口](INSTALL.md)。其他客户端必须具备 Skill 加载和本地命令执行能力；原有 [客户端专用包](CLIENTS.md) 保留供兼容使用，豆包工作包仍为预览。
 
-## 手动安装
+## 下载与安装
 
-下载本仓库后，在 Linux/WSL 运行：
+- [直接下载 HiDOG Skill 1.2.0 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip)
+- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip.sha256)
 
-```bash
-bash hidog/scripts/install.sh
-"$HOME/.local/share/hidog/bin/hidog" --help
-```
+解压后使用统一安装器，同时安装 Skill、HiDOG 程序和报告依赖，并执行自测。
 
-安装器下载固定 Release 并校验 SHA256，在用户目录创建独立生信工具环境。已有版本不覆盖；更换版本用 `--version`，改变安装根目录用 `--prefix`。失败下载和日志保留供检查。
+Linux/WSL：`bash install-skill.sh --client codex`；Claude Code 将 codex 换为 claude。
 
-安装后可使用 [40 对 reads 的合成示例](hidog/examples/README.md) 自测，预期正式 Editing frequency 为 50%。示例没有真实样品数据。
+Windows：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-skill.ps1 -Client codex`。多 WSL 发行版使用已确认的 `-Distro`。详细要求见 [INSTALL.md](INSTALL.md)。
+
+已有不同版本 Skill 会保留并提示冲突；升级时先比较并备份旧目录，再用新包安装，避免丢失用户修改。程序环境可复用，旧结果不会被覆盖。
+
+## 用户提供什么、得到什么
+
+按 [输入规范](hidog/references/input-format.md) 提供 paired FASTQ、未编辑参考、barcode、实验布局及模式设计；按孔报告另附样品—板—孔对应表。Agent 会集中询问缺失信息并检查格式。
+
+分析完成生成 HTML 报告、TSV 数值和 PNG/SVG 编辑频率图，包括建库/测序诊断、每孔 reads 分配、少于 1000 read pairs 提醒、每目标有效分析量、A/B/D 比例和偏倚提示。A/B/D 预期必须依据实验确认。UMI family 结果独立呈现，统计口径见 [报告说明](hidog/references/reporting.md)。
+
+核心固定 v11.2.0-rc.1，增强报告不修改算法或原生输出。第一次安装须访问 GitHub、conda-forge、bioconda、PyPI；核心源码不随包提供，公开 Python 脚本仅做输入校验和结果汇总。

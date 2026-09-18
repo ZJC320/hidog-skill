@@ -10,12 +10,12 @@
 
 ## 2. 下载同一个固定安装包
 
-- [HiDOG Skill 1.1.0 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.1.0/hidog-skill-1.1.0.zip)
-- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.1.0/hidog-skill-1.1.0.zip.sha256)
+- [HiDOG Skill 1.2.0 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip)
+- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip.sha256)
 
 用客户端现有下载工具保存两个文件到新的临时目录。计算 ZIP 的 SHA256，并与摘要文件第一列的64位十六进制值比较；不一致立即停止，不绕过验证。校验后解压完整内容，阅读其中 `hidog/SKILL.md` 和将要运行的安装脚本。
 
-这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.1.0，分析核心固定为v11.2.0-rc.1，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda，不从源码安装，不要求用户提供API密钥。
+这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.0，分析核心固定为v11.2.0-rc.1，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
 
 ## 3. 注册 Skill 并安装、自测
 
@@ -49,7 +49,7 @@ Windows 入口只在当前进程允许运行随包脚本，不修改全局执行
 
 ## 4. 必须验证后再交付
 
-统一安装器会注册 Skill、安装或复用编译程序、执行合成自测，核对两份 Stats 均为 Assigned=40、Modified=20、Editing frequency=50%，并检查 Excel/HTML 报告存在。
+统一安装器会注册 Skill、安装或复用编译程序、执行合成自测，核对两份 Stats 均为 Assigned=40、Modified=20、Editing frequency=50%，并检查 Excel/HTML 报告；同时安装独立报告环境，验证增强报告的40对reads、低深度警告、50%编辑频率及图像。
 
 只有进程退出码为0且出现 `SELFTEST PASS`，才报告“安装和自测通过”。保留并告知 Skill 安装目录、运行版本、自测结果目录与日志。安装/自测失败时报告具体阶段、错误与保留的日志；不要改阈值或用伪造报告继续。
 
