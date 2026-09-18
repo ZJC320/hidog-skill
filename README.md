@@ -4,6 +4,8 @@
 
 ## 给 agent 使用
 
+WorkBuddy、Claude Code 和豆包工作用户请先看 [客户端专用下载与安装](CLIENTS.md)。豆包工作包为兼容预览，普通聊天版不能直接执行本地 HiDOG。
+
 将 `hidog/` 文件夹放入你的 agent 支持的 Skill 目录，或直接要求 agent 阅读 `hidog/SKILL.md`。不同产品的自动发现机制不同；本包提供通用说明，不承诺任意产品零配置接入。agent 必须能够访问数据并执行 Linux/WSL 命令。
 
 ## 手动安装
