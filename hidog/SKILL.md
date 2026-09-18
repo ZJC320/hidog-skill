@@ -9,6 +9,10 @@ description: 在 Linux 或 Windows WSL 上安装并运行 HiDOG V11.2，分析�
 
 ## 安装与运行环境
 
+用户要求安装或首次使用时，主动完成环境准备，不把可自行执行的下载/安装命令交还用户。Linux/WSL 从本 Skill 目录执行 `bash scripts/agent.sh setup`；Windows 从实际 Skill 目录执行 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File '<skill目录>\scripts\agent.ps1' -Action setup`。这会安装或复用核心，并核对自测的40/20/50%结果和报告；退出码为0且出现 `SELFTEST PASS` 才能报告安装完成。结果和日志位于运行环境下 `self-tests/` 的独立目录。
+
+Windows 多个 WSL 发行版时传 `-Distro '<已确认的名称>'` 并在后续调用沿用。真实分析使用 `agent.ps1 -Action run -HidogArgs @('选项', '值', ...)`，Windows盘符绝对路径会转换为WSL路径；Linux使用 `agent.sh run` 后接原参数。PowerShell运行后立刻检查 `$LASTEXITCODE`，外层 .ps1 包装必须 `exit $LASTEXITCODE`，不能吞掉错误。缺少WSL或受到宿主权限限制时报告实际阻塞，不擅自重启、关闭安全控制或上传数据切换云端运行。
+
 1. 判断实际终端是 PowerShell 还是 Linux。HiDOG 必须在 Linux/WSL x86_64、glibc >= 2.31 中运行；Windows 原生和 ARM 不支持。Windows 用户先确认 WSL 已安装且可用。
 2. 默认程序入口为 `$HOME/.local/share/hidog/bin/hidog`。检查 `--version`、`--help`；分析任务固定版本，勿自动升级正在使用的版本。
 3. 未安装时，在 Linux/WSL 执行本 Skill 相对路径 `bash scripts/install.sh`；默认安装 v11.2.0-rc.1。脚本联网下载并校验，创建用户私有依赖环境，无须 sudo。不从源码安装、不索取核心源码。
