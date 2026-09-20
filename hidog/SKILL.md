@@ -7,7 +7,7 @@ description: 在 Linux 或 Windows WSL 安装并运行 HiDOG，检查扩增子�
 
 使用本地编译版 HiDOG 分析用户指定的数据。核心源码不随 Skill 分发。此包不依赖某个 agent 产品；不能执行终端命令时，提供可执行命令并说明尚未运行。
 
-公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.0 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
+公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.1 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-skill-1.2.1.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
 
 ## 安装与运行环境
 
@@ -35,10 +35,28 @@ FASTQ 分析前读取 [输入规范与模板](references/input-format.md)，收�
 - 主流程收集 gzip R1/R2 FASTQ、原始未编辑参考 FASTA、barcode 表及模式需要的 guide/primer 文件。已有 Hi-TOM 表格可走程序原有导入接口，不能代替 UMI 原始 reads。
 - 检查输入存在、配对、命名关系、输出是否已存在；新分析使用新目录，不覆盖原始文件或旧结果。重跑/恢复先核对版本和输入参数。
 - 运行前展示模式、输入、输出、关键建库参数和资源；用户已授权该分析时直接运行，缺少关键参数时保留待确认。优先使用绝对路径和参数列表，正确引用含空格的路径。
-- 使用统一 `hidog` 入口传递原 CLI 参数。保留命令、程序版本、运行时间、日志、退出码及结果目录；大型集群任务遵守用户的调度规则，不在登录节点直接启动重分析。
+- 使用统一 `hidog` 入口传递原 CLI 参数。运行期间保留命令、程序版本、运行时间、日志、退出码及结果目录；成功交付时按下述 clean-result 规则整理和清理。大型集群任务遵守用户的调度规则，不在登录节点直接启动重分析。
 - 长任务不要因为暂时没有新输出就重启。通过 agent 的进程管理能力或用户现有调度器查看进度；不能自行声称后台任务已完成。
 - 非零退出码报告为失败，列出具体日志原因和下一步。禁止悄悄放宽阈值、跳过失败样本或用源码版回退。
 - 完成后检查必要的 Stats、工作簿、QC、HTML/审计文件；汇总实际结果、失败样本、限制和本地文件位置。不要把 smoke test 或程序正常退出说成完整生物学验收。
+
+## 最终交付与中间文件清理（默认执行）
+
+使用本 Skill 完成分析后，Agent 只向用户交付 `clean-result/`，其顶层只包含以下四类目录；前缀使用实际文库名称，不固定为截图中的 `1023R1`：
+
+```text
+clean-result/
+├── <文库名>_summary_by_reference/
+├── html_reports/
+├── plots/
+└── qc_reports/
+```
+
+- 按 [报告整理与清理步骤](references/reporting.md#clean-result-整理与清理) 执行：先完成所有报告、整理四类最终结果、验证内容与链接，再直接删除本次运行的其他中间文件；不能只隐藏文件或另存一份 clean-result 后仍保留整套中间产物。
+- 增强报告、编辑图、UMI 最终统计及必要的解释性审计先归入上述目录，不因原存放位置在其他目录而漏交付或误删。不得将 BAM、拆样 FASTQ 等中间产物搬进保留目录规避清理。
+- 删除仅限本次任务新建且明确归属本次运行的工作目录内、已经确认不再被最终报告依赖的产物；核实绝对路径范围，不跟随符号链接删除外部内容。原始输入、程序/环境、历史结果及其他任务文件不属于清理对象。
+- 分析失败、进程仍在运行、报告缺失或校验失败时不清理，保留排错文件并说明实际状态。清理失败则报告未完成项，不宣称已经完成 clean-result 交付。
+- 当前 `analyze` 生成报告后，由调用 Skill 的 Agent 执行此收尾规则；直接调用底层 CLI 不等于已自动清理。用户最终只收到 clean-result 路径及其内的报告链接。此次规则变更不追溯删除已有结果。
 
 ## 解释边界
 

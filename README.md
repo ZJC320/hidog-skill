@@ -14,8 +14,8 @@ Agent 请读取 [统一自动安装入口](INSTALL.md)。其他客户端必须�
 
 ## 下载与安装
 
-- [直接下载 HiDOG Skill 1.2.0 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip)
-- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip.sha256)
+- [直接下载 HiDOG Skill 1.2.1 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-skill-1.2.1.zip)
+- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-skill-1.2.1.zip.sha256)
 
 解压后使用统一安装器，同时安装 Skill、HiDOG 程序和报告依赖，并执行自测。
 
@@ -32,3 +32,5 @@ Windows：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-ski
 分析完成生成 HTML 报告、TSV 数值和 PNG/SVG 编辑频率图，包括建库/测序诊断、每孔 reads 分配、少于 1000 read pairs 提醒、每目标有效分析量、A/B/D 比例和偏倚提示。A/B/D 预期必须依据实验确认。UMI family 结果独立呈现，统计口径见 [报告说明](hidog/references/reporting.md)。
 
 核心固定 v11.2.0-rc.1，增强报告不修改算法或原生输出。第一次安装须访问 GitHub、conda-forge、bioconda、PyPI；核心源码不随包提供，公开 Python 脚本仅做输入校验和结果汇总。
+
+成功分析后，Skill 要求 Agent 仅交付 `clean-result/` 内的 `*_summary_by_reference/`、`html_reports/`、`plots/`、`qc_reports/`；验证报告完整后删除本次其余中间产物。原始输入、历史结果和失败任务排错文件保留。清理是 Agent 的收尾步骤，直接调用底层 CLI 不会自动执行。

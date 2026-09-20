@@ -10,12 +10,12 @@
 
 ## 2. 下载同一个固定安装包
 
-- [HiDOG Skill 1.2.0 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip)
-- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-skill-1.2.0.zip.sha256)
+- [HiDOG Skill 1.2.1 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-skill-1.2.1.zip)
+- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-skill-1.2.1.zip.sha256)
 
 用客户端现有下载工具保存两个文件到新的临时目录。计算 ZIP 的 SHA256，并与摘要文件第一列的64位十六进制值比较；不一致立即停止，不绕过验证。校验后解压完整内容，阅读其中 `hidog/SKILL.md` 和将要运行的安装脚本。
 
-这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.0，分析核心固定为v11.2.0-rc.1，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
+这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.1，分析核心固定为v11.2.0-rc.1，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
 
 ## 3. 注册 Skill 并安装、自测
 

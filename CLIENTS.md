@@ -1,14 +1,14 @@
 # HiDOG 客户端下载与安装
 
-**优先使用 [统一自动安装入口](INSTALL.md)**：把链接交给 Agent，说“安装 HiDOG 并自测”，由它完成安装。Codex、Claude Code 共用同一份 Skill，无需用户选择专用包。以下1.2.0包用于需要 ZIP 导入的客户端；旧1.0.0附件仍保留在历史 Release。
+**优先使用 [统一自动安装入口](INSTALL.md)**：把链接交给 Agent，说“安装 HiDOG 并自测”，由它完成安装。Codex、Claude Code 共用同一份 Skill，无需用户选择专用包。以下1.2.1包用于需要 ZIP 导入的客户端；旧1.0.0附件仍保留在历史 Release。
 
-客户端适配包版本为 **1.2.0**，分析核心仍固定为 **v11.2.0-rc.1**，未修改算法或输出。
+客户端适配包版本为 **1.2.1**，分析核心仍固定为 **v11.2.0-rc.1**，未修改算法或输出。
 
 | 客户端 | 下载 | 开始使用 |
 | --- | --- | --- |
-| WorkBuddy | [专用 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-workbuddy-1.2.0.zip) | 技能 → 添加技能 → 上传技能，选择 ZIP，启用后要求安装和自测 |
-| Claude Code | [专用 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-claude-code-1.2.0.zip) | 解压；Windows 双击 install-claude.cmd；Linux/WSL 执行 bash install-claude.sh；在 Claude Code 输入 /hidog |
-| 豆包工作电脑版 | [兼容预览 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.0/hidog-doubao-work-preview-1.2.0.zip) | 仅面向有自定义技能导入与本地执行能力的工作模式；在技能管理上传后选择本地电脑，要求安装和自测。客户端导入尚待验证 |
+| WorkBuddy | [专用 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-workbuddy-1.2.1.zip) | 技能 → 添加技能 → 上传技能，选择 ZIP，启用后要求安装和自测 |
+| Claude Code | [专用 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-claude-code-1.2.1.zip) | 解压；Windows 双击 install-claude.cmd；Linux/WSL 执行 bash install-claude.sh；在 Claude Code 输入 /hidog |
+| 豆包工作电脑版 | [兼容预览 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-doubao-work-preview-1.2.1.zip) | 仅面向有自定义技能导入与本地执行能力的工作模式；在技能管理上传后选择本地电脑，要求安装和自测。客户端导入尚待验证 |
 
 普通豆包聊天网页/手机聊天没有本包需要的本地执行入口时，不能直接使用。豆包模型 API、豆包工作、普通豆包聊天不是同一种接入方式。此预览不承诺所有豆包版本兼容。
 
