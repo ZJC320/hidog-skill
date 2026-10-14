@@ -3,7 +3,8 @@
 set -euo pipefail
 base=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 prefix=${1:?Expected absolute HiDOG prefix}
-core="$prefix/v11.2.0-rc.1/runtime/bin/python"
+launcher=$(readlink -f "$prefix/bin/hidog")
+core="$(dirname "$(dirname "$launcher")")/runtime/bin/python"
 destination="$prefix/reporting-1.2.0"
 [[ -x "$core" ]] || { echo 'Install the fixed HiDOG core first' >&2; exit 1; }
 digest=$(sha256sum "$base/reporting-requirements.txt" | cut -d ' ' -f1)

@@ -7,7 +7,7 @@ description: 在 Linux 或 Windows WSL 安装并运行 HiDOG，检查扩增子�
 
 使用本地编译版 HiDOG 分析用户指定的数据。核心源码不随 Skill 分发。此包不依赖某个 agent 产品；不能执行终端命令时，提供可执行命令并说明尚未运行。
 
-公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.1 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.1/hidog-skill-1.2.1.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
+公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.2 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.2/hidog-skill-1.2.2.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
 
 ## 安装与运行环境
 
@@ -17,11 +17,11 @@ Windows 多个 WSL 发行版时传 `-Distro '<已确认的名称>'` 并在后续
 
 1. 判断实际终端是 PowerShell 还是 Linux。HiDOG 必须在 Linux/WSL x86_64、glibc >= 2.31 中运行；Windows 原生和 ARM 不支持。Windows 用户先确认 WSL 已安装且可用。
 2. 默认程序入口为 `$HOME/.local/share/hidog/bin/hidog`。检查 `--version`、`--help`；分析任务固定版本，勿自动升级正在使用的版本。
-3. 未安装时，在 Linux/WSL 执行本 Skill 相对路径 `bash scripts/agent.sh setup`；默认安装 v11.2.0-rc.1。脚本联网下载并校验，创建用户私有依赖环境，无须 sudo。不从源码安装、不索取核心源码。
+3. 未安装时，在 Linux/WSL 执行本 Skill 相对路径 `bash scripts/agent.sh setup`；默认安装 v11.2.0-rc.2。脚本联网下载并校验，创建用户私有依赖环境，无须 sudo。不从源码安装、不索取核心源码。
 4. 安装器使用 GitHub、conda-forge、bioconda 和 PyPI（锁定报告依赖）。下载或校验失败即停止并报告日志；不要关闭证书校验、跳过哈希验证或修改系统 Python 来绕过失败。已有版本目录不覆盖，失败目录保留供诊断。
 5. WSL 参数用 `/home/...` 或 `/mnt/<drive>/...` 路径。先验证路径，不把 Windows 反斜杠路径直接传给 Linux 程序。
 
-首次使用、准备命令或解释模式输出时读取 [使用与结果说明](references/usage.md)，并以已安装程序的 `--help` 为准确参数依据。
+首次使用、准备命令或解释模式输出时读取 [使用与结果说明](references/usage.md)，并以已安装程序的 `--help` 为准确参数依据。 用户明确要求升级时，按该说明的“已有安装的明确升级”核对分发版本并完成自测；已有安装会复用，更新技能文件本身不表示核心已经升级。
 
 安装后可按 [合成自测](examples/README.md) 验证 40 对 reads 的预期结果；不要将示例的布局或低深度阈值套用到真实实验。
 
