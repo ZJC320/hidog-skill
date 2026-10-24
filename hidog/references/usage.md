@@ -50,12 +50,20 @@ ordered UMI_R1/UMI_R2 和 target group 一起确定 family。read 和 family 输
 
 ## 验证状态与日志
 
-v11.2.0-rc.2 是候选分发版。分发说明分别记录工程验证和真实数据验收范围。每次运行记录用户需求、版本、时间、命令、输入路径、结果、失败项、进一步改进计划；成功交付时将必要记录纳入 `clean-result/qc_reports/`，按 [报告整理规则](reporting.md#clean-result-整理与清理) 删除本次其余中间产物。失败任务保留排错日志。不能把已有文档中的 PASS 当成本次执行结果。
+v11.2.0-rc.3 是候选分发版。分发说明分别记录工程验证和真实数据验收范围。每次运行记录用户需求、版本、时间、命令、输入路径、结果、失败项、进一步改进计划；成功交付时将必要记录纳入 `clean-result/qc_reports/`，按 [报告整理规则](reporting.md#clean-result-整理与清理) 删除本次其余中间产物。失败任务保留排错日志。不能把已有文档中的 PASS 当成本次执行结果。
 
 ## 已有安装的明确升级
 
-用户要求升级到本次性能优化版本时，先确认没有正在运行的分析，并记录当前 `bin/hidog` 的目标。Linux/WSL 从技能目录执行 `bash scripts/install.sh --version v11.2.0-rc.2 --prefix "$HOME/.local/share/hidog"`，成功后执行 `bash scripts/agent.sh setup`；Windows 技能文件通过已确认的 WSL 发行版执行同一安装脚本，再运行 `agent.ps1 -Action setup`。已存在 rc.2 时先核对 build-metadata.json 和自测，不重复覆盖该目录。旧 rc.1 目录与历史结果保留。
+用户要求升级到本次性能优化版本时，先确认没有正在运行的分析，并记录当前 `bin/hidog` 的目标。Linux/WSL 从技能目录执行 `bash scripts/install.sh --version v11.2.0-rc.3 --prefix "$HOME/.local/share/hidog"`，成功后执行 `bash scripts/agent.sh setup`；Windows 技能文件通过已确认的 WSL 发行版执行同一安装脚本，再运行 `agent.ps1 -Action setup`。已存在 rc.3 时先核对 build-metadata.json 和自测，不重复覆盖该目录。旧 rc.1/rc.2 目录与历史结果保留。
 
-核心 `--version` 仍显示 `hidogV11.2 11.2.0`，不能据此区分 rc.1/rc.2；通过实际入口指向的版本目录、VERSION 和 build-metadata.json 核对分发版本。rc.2 核心 packages SHA256 为 `4081118cf9d3b0da86e28d2d405c9b3c6b54ecd3daf8204060247d6ff6b0a3dc`。
+核心 `--version` 仍显示 `hidogV11.2 11.2.0`，不能据此区分 rc.1/rc.2/rc.3；通过实际入口指向的版本目录、VERSION 和 build-metadata.json 核对分发版本。rc.3 核心 packages SHA256 为 `a18b40d22b9e64e4a3b765f7653147a5185a879ced922df838b18355ade65145`。
 
 本次性能验收涵盖 Cas9 和单 PE；真实 dualPE、历史 E4 未完成验收。单 PE 默认骨架长度为 1nt、dualPE 为 8nt，均以程序 help 和实际实验设计为准。不要重复提供 --sample-ratio；默认 1nt PE 的某库峰值约 67GB，不能把这项不同文库观察解释为阈值本身造成的内存变化。
+
+## rc.3 Cas9 性能与历史结果边界
+
+本次分发采用44ad6cb的Cas9性能实现，复用完整依赖的计算结果、降低数据复制与编码成本，并改进任务调度；不修改正式频率、窗口、双端证据或genotype阈值。真实数据耗时依赖文库、硬件和资源，不能承诺所有文库十分钟内完成。
+
+历史输出与当前输出的差异，不等于rc.2到rc.3提速引入的差异。早期default比对与当前cas9-sensitive比对、大indel软剪切表示、COMPOSITE_TAG_HARD归属和WT进入分母，都可能改变历史计数；应先固定同一版本和参数核对，不能把Summary展示比例当作正式频率。
+
+已有多天然状态的无序集合问题会让部分COMPOSITE内部诊断随Python哈希种子改变；已观察7条未归属qname的最终分类不变，但不保证其他输入无影响。rc.3保留此既有行为，固定种子只用于受控比较，不是算法修复。结果差异须保留证据，不能通过变更种子挑选预期答案。
