@@ -50,19 +50,27 @@ ordered UMI_R1/UMI_R2 和 target group 一起确定 family。read 和 family 输
 
 ## 验证状态与日志
 
-v11.2.0-rc.3 是候选分发版。分发说明分别记录工程验证和真实数据验收范围。每次运行记录用户需求、版本、时间、命令、输入路径、结果、失败项、进一步改进计划；成功交付时将必要记录纳入 `clean-result/qc_reports/`，按 [报告整理规则](reporting.md#clean-result-整理与清理) 删除本次其余中间产物。失败任务保留排错日志。不能把已有文档中的 PASS 当成本次执行结果。
+v11.2.0-rc.4 是候选分发版。分发说明分别记录工程验证和真实数据验收范围。每次运行记录用户需求、版本、时间、命令、输入路径、结果、失败项、进一步改进计划；成功交付时将必要记录纳入 `clean-result/qc_reports/`，按 [报告整理规则](reporting.md#clean-result-整理与清理) 删除本次其余中间产物。失败任务保留排错日志。不能把已有文档中的 PASS 当成本次执行结果。
 
 ## 已有安装的明确升级
 
-用户要求升级到本次性能优化版本时，先确认没有正在运行的分析，并记录当前 `bin/hidog` 的目标。Linux/WSL 从技能目录执行 `bash scripts/install.sh --version v11.2.0-rc.3 --prefix "$HOME/.local/share/hidog"`，成功后执行 `bash scripts/agent.sh setup`；Windows 技能文件通过已确认的 WSL 发行版执行同一安装脚本，再运行 `agent.ps1 -Action setup`。已存在 rc.3 时先核对 build-metadata.json 和自测，不重复覆盖该目录。旧 rc.1/rc.2 目录与历史结果保留。
+用户要求升级到本次性能优化版本时，先确认没有正在运行的分析，并记录当前 `bin/hidog` 的目标。Linux/WSL 从技能目录执行 `bash scripts/install.sh --version v11.2.0-rc.4 --prefix "$HOME/.local/share/hidog"`，成功后执行 `bash scripts/agent.sh setup`；Windows 技能文件通过已确认的 WSL 发行版执行同一安装脚本，再运行 `agent.ps1 -Action setup`。已存在 rc.4 时先核对 build-metadata.json 和自测，不重复覆盖该目录。旧 rc.1/rc.2/rc.3 目录与历史结果保留。
 
-核心 `--version` 仍显示 `hidogV11.2 11.2.0`，不能据此区分 rc.1/rc.2/rc.3；通过实际入口指向的版本目录、VERSION 和 build-metadata.json 核对分发版本。rc.3 核心 packages SHA256 为 `a18b40d22b9e64e4a3b765f7653147a5185a879ced922df838b18355ade65145`。
+核心 `--version` 仍显示 `hidogV11.2 11.2.0`，不能据此区分 rc.1/rc.2/rc.3/rc.4；通过实际入口指向的版本目录、VERSION 和 build-metadata.json 核对分发版本。rc.4 核心 packages SHA256 为 `cbc6547b607f7dca9d5023d96cf6fd560c9f078285ef6c860f75131d03343807`。
 
-本次性能验收涵盖 Cas9 和单 PE；真实 dualPE、历史 E4 未完成验收。单 PE 默认骨架长度为 1nt、dualPE 为 8nt，均以程序 help 和实际实验设计为准。不要重复提供 --sample-ratio；默认 1nt PE 的某库峰值约 67GB，不能把这项不同文库观察解释为阈值本身造成的内存变化。
+本次新增ER19单PE性能验收；Cas9为rc.3已有证据，真实dualPE、历史E4的既有缺口不因本次单PE验证而关闭。单 PE 默认骨架长度为 1nt、dualPE 为 8nt，均以程序 help 和实际实验设计为准。不要重复提供 --sample-ratio；默认 1nt PE 的某库峰值约 67GB，不能把这项不同文库观察解释为阈值本身造成的内存变化。
 
-## rc.3 Cas9 性能与历史结果边界
+## rc.4 单PE性能与复现范围
 
-本次分发采用44ad6cb的Cas9性能实现，复用完整依赖的计算结果、降低数据复制与编码成本，并改进任务调度；不修改正式频率、窗口、双端证据或genotype阈值。真实数据耗时依赖文库、硬件和资源，不能承诺所有文库十分钟内完成。
+rc.4保留精确C affine/flank内核、延迟scaffold证据及限定单PE一次任务worker的GC策略，科学参数/归属/频率不变。ER19全量3,427,370对reads、两组6参考，16线程与**显式 `HIDOG_SUMMARY_WORKERS=16`**三次为552.603870376、603.062516518、551.118200074秒，中位552.603870376秒；三次均≤600秒标准FAIL，不保证每库十分钟。**默认summary上限仍4，未改为16**；16需按已确认CPU/内存和数据规模显式选择，不能直接照搬到资源不足的机器。
+
+同参数全192任务、2,435,567归属decisions与1,869,940 classifications精确一致；三轮上游各768文件精确，四份编译实跑正式报告各1232文件/1152视图/0差异。原科学高层仍CPython，限定未改affine由经59,888条原CPython记录验证的PyPy执行；报告对照为修改后的native_v3检查点，不冒称纯557端到端报告重跑。没有新增真实实验真值或CRISPResso2验证，原未优化全流程中止故不提供端到端倍率。
+
+增强报告的NA处理/ASCII校验已同步；独立生成三次37.580324918/37.688736061/37.011046262秒，原对照109.906474471秒为单次。每次重新完整校验FASTQ，报告间未清缓存；不是与核心连续计时，不能拿核心单独成绩承诺整个Agent工作流用时。原历史ER19参考标签、pegRNA、抽样和阈值不同，不是本次等价对照。scope复用试验未达预设5%门槛，未纳入生产。
+
+## rc.3 Cas9 性能与历史结果边界（原版本记录）
+
+rc.3分发采用44ad6cb的Cas9性能实现，复用完整依赖的计算结果、降低数据复制与编码成本，并改进任务调度；不修改正式频率、窗口、双端证据或genotype阈值。真实数据耗时依赖文库、硬件和资源，不能承诺所有文库十分钟内完成。
 
 历史输出与当前输出的差异，不等于rc.2到rc.3提速引入的差异。早期default比对与当前cas9-sensitive比对、大indel软剪切表示、COMPOSITE_TAG_HARD归属和WT进入分母，都可能改变历史计数；应先固定同一版本和参数核对，不能把Summary展示比例当作正式频率。
 

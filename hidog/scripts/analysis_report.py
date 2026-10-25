@@ -115,7 +115,8 @@ def collect(root, sample_sheet=None, abd_design=None, preflight=None):
             modified = integer(row['Modified reads'])
             if modified > assigned or assigned > counts[key[0]]:
                 raise ValueError(f'Inconsistent final read counts: {key}')
-            freq = percent(modified, assigned)
+            # Respect a deliberately unavailable official frequency (for example low depth).
+            freq = None if row['Editing frequency'] == 'NA' else percent(modified, assigned)
             if freq is not None:
                 exported = float(row['Editing frequency'])
                 if not math.isfinite(exported) or abs(exported - freq) > 0.011:
@@ -178,7 +179,7 @@ def collect(root, sample_sheet=None, abd_design=None, preflight=None):
     if preflight_data and preflight_data['fastq']['pairs'] != raw_total:
         raise ValueError('Preflight raw pair count differs from this analysis')
     sources.extend(Path(p) for p in [sample_sheet, abd_design, preflight] if p)
-    return {'created_utc': datetime.now(timezone.utc).isoformat(), 'skill_version': '1.2.0',
+    return {'created_utc': datetime.now(timezone.utc).isoformat(), 'skill_version': '1.2.4',
             'run_root': str(root), 'samples': samples, 'editing': editing, 'assignment': assignment,
             'abd': abd, 'abd_design': designs, 'family': family,
             'library': {'raw_pairs': raw_total, 'split_pairs': split_total,
@@ -259,7 +260,7 @@ def render(data, output):
     lib = data['library']
     parts = ['<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>HiDOG 分析报告</title>',
              '<style>body{font:15px system-ui;max-width:1200px;margin:40px auto;padding:0 20px;color:#17313b}h1,h2{color:#126c80}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border:1px solid #d7e1e5;padding:8px;text-align:left}th{background:#eef5f7}img{max-width:100%}.note{padding:14px;background:#fff5df}</style>',
-             '<h1>HiDOG 分析报告</h1><p>' + html.escape(data['created_utc']) + ' · Skill 1.2.0 · hard-only</p>',
+             '<h1>HiDOG 分析报告</h1><p>' + html.escape(data['created_utc']) + ' · Skill 1.2.4 · hard-only</p>',
              '<p class="note">本批 ' + str(len(data['samples'])) + ' 个样品；'
              + str(sum(bool(r['warning']) for r in data['samples'])) + ' 个拆样深度低于 1000 对；'
              + str(sum(r['status'] == '疑似扩增或分配偏倚' for r in data['abd'])) + ' 个样品×目标组合提示疑似偏倚。'
@@ -273,7 +274,7 @@ def render(data, output):
              display_table(data['samples']), '<h2>3. 最终可用于编辑分析的 reads</h2>', display_table(data['assignment']),
              '<h2>4. A/B/D 分配与偏倚提示</h2><p>A/B/D 百分比的分母为同样品、同目标组 A+B+D 最终 hard-only pairs；不是全库比例。未确认预期比例、参考对应或深度不足时不判断偏倚。</p>',
              display_table(data['abd']), '<p>本次判定配置：</p><pre>' + html.escape(json.dumps(data['abd_design'], ensure_ascii=False, indent=2)) + '</pre>',
-             '<h2>5. 样品编辑频率</h2><p>按样品×参考绘图；分母为最终 assigned pairs，Modified 为分子，零分母显示 NA。总编辑频率不等于 dualPE 完整精准编辑效率。</p>',
+             '<h2>5. 样品编辑频率</h2><p>按样品×参考绘图；分母为最终 assigned pairs，Modified 为分子，零分母或正式统计标为 NA 时显示 NA。总编辑频率不等于 dualPE 完整精准编辑效率。</p>',
              display_table(data['editing'])]
     if data['family']:
         parts.extend(['<h2>UMI family 结果（独立统计）</h2><p>terminal UMI family 不等于原始 DNA molecule；不把 reads 阈值 1000 套用于 family 数。</p>', display_table(data['family'])])
