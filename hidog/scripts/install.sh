@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-version=v11.2.0-rc.3
+version=v11.2.0-rc.4
 prefix="${HOME}/.local/share/hidog"
 usage() {
-  echo 'Usage: bash install.sh [--version v11.2.0-rc.3] [--prefix ABSOLUTE_DIRECTORY]'
+  echo 'Usage: bash install.sh [--version v11.2.0-rc.4] [--prefix ABSOLUTE_DIRECTORY]'
   echo 'Installs the compiled Linux x86_64 release and a private tool environment.'
 }
 fail() { echo "ERROR: $*" >&2; exit 1; }

@@ -10,12 +10,12 @@
 
 ## 2. 下载同一个固定安装包
 
-- [HiDOG Skill 1.2.3 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.3/hidog-skill-1.2.3.zip)
-- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.3/hidog-skill-1.2.3.zip.sha256)
+- [HiDOG Skill 1.2.4 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.4/hidog-skill-1.2.4.zip)
+- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.4/hidog-skill-1.2.4.zip.sha256)
 
 用客户端现有下载工具保存两个文件到新的临时目录。计算 ZIP 的 SHA256，并与摘要文件第一列的64位十六进制值比较；不一致立即停止，不绕过验证。校验后解压完整内容，阅读其中 `hidog/SKILL.md` 和将要运行的安装脚本。
 
-这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.3，分析核心固定为v11.2.0-rc.3，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
+这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.4，分析核心固定为v11.2.0-rc.4，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
 
 ## 3. 注册 Skill 并安装、自测
 
@@ -56,3 +56,7 @@ Windows 入口只在当前进程允许运行随包脚本，不修改全局执行
 下载和环境安装可能耗时数分钟；跟踪同一进程，不重复启动。客户端未立即发现新技能时，先说明下个会话/重启客户端后检查；不要谎称已验证模型自动触发。安装完成后用户直接说“用 HiDOG 分析这些数据”即可按技能收集实验参数。
 
 参考：[Codex 官方技能目录](https://learn.chatgpt.com/docs/build-skills)、[Claude Code 官方技能目录](https://code.claude.com/docs/en/skills)。
+
+## 已有版本升级
+
+用户已明确要求升级时，先确认无分析在运行并记录旧核心入口，比较/备份用户Skill目录，保留用户修改；不要用覆盖冲突的方式升级。将新Skill注册到原客户端的同一已确认目录后，按[已有安装升级步骤](hidog/references/usage.md#已有安装的明确升级)显式安装v11.2.0-rc.4并setup。普通setup会复用已有核心，不能仅看到11.2.0就声称已切换rc.4；须核对实际版本目录、VERSION、build-metadata.json和SELFTEST PASS。旧rc.3及结果保留。

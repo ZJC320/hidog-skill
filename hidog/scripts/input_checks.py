@@ -78,7 +78,7 @@ def fastq_records(path):
             seq, plus, qual = (handle.readline().rstrip('\r\n') for _ in range(3))
             if not header.startswith('@') or not plus.startswith('+') or not seq or len(seq) != len(qual):
                 raise ValueError(f'{path}: invalid/truncated FASTQ record {number}')
-            if set(seq) - set('ACGTN') or any(ord(q) < 33 or ord(q) > 126 for q in qual):
+            if re.fullmatch(r'[ACGTN]+', seq) is None or re.fullmatch(r'[!-~]+', qual) is None:
                 raise ValueError(f'{path}: require uppercase ACGTN sequence and Phred+33 quality at record {number}')
             fields = header[1:].split()
             if not fields:
