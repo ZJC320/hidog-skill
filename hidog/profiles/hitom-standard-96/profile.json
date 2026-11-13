@@ -1,0 +1,25 @@
+{
+  "source": "Hi-TOM (2019), DOI 10.1007/s11427-018-9402-9, Supplementary Tables S1/S2; generated barcode facts, not copied supplement",
+  "version": "hitom-standard-96-v1",
+  "barcode": "barcodes.tsv",
+  "barcode_sha256": "3e1f9e5aa7e931d0f31e77019cf265e7496f6cfa642165fd71c076896f61a0a6",
+  "layout": {
+    "spacer-length": 4,
+    "barcode-length": 4,
+    "post-barcode-spacer-length": 1,
+    "bridge-length": 18,
+    "umi-mode": "off"
+  },
+  "read_motifs": {
+    "R1": {
+      "prefix": "GCTT",
+      "post": "T",
+      "bridge": "GGAGTGAGTACGGTGTGC"
+    },
+    "R2": {
+      "prefix": "CTGT",
+      "post": "T",
+      "bridge": "GAGTTGGATGCTGGATGG"
+    }
+  }
+}

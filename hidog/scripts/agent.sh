@@ -47,15 +47,14 @@ case "$action" in
     "$prefix/reporting-1.2.0/bin/python" -c 'import json,sys,pathlib; p=pathlib.Path(sys.argv[1]); d=json.loads((p/"report.json").read_text()); assert d["samples"][0]["split_pairs"]==40; assert d["samples"][0]["warning"]=="LOW_READS(<1000)"; assert d["editing"][0]["frequency_percent"]==50; assert list(p.glob("editing_read_*.png"))' "$run/skill-report"
     printf 'SELFTEST PASS: Assigned=40 Modified=20 Editing_frequency=50%%\nResults: %s/results\n' "$run" | tee "$run/verification.txt"
     ;;
-  check|install)
+  install)
     [[ $# -eq 0 ]] || fail 'Unexpected arguments'
-    if [[ -x "$launcher" ]]; then
-      exec "$launcher" --version
-    elif [[ "$action" == install ]]; then
-      exec bash "$base/scripts/install.sh" --prefix "$prefix"
-    else
-      fail 'HiDOG is not installed. Run this entry point with action install.'
-    fi ;;
+    # The installer validates the package-pinned release, not the short CLI version.
+    exec bash "$base/scripts/install.sh" --prefix "$prefix" ;;
+  check)
+    [[ $# -eq 0 ]] || fail 'Unexpected arguments'
+    [[ -x "$launcher" ]] || fail 'HiDOG is not installed. Run action setup.'
+    exec "$launcher" --version ;;
   run)
     [[ -x "$launcher" ]] || fail 'Run action install first'
     exec "$launcher" "$@" ;;

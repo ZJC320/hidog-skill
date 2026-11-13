@@ -10,12 +10,12 @@
 
 ## 2. 下载同一个固定安装包
 
-- [HiDOG Skill 1.2.4 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.4/hidog-skill-1.2.4.zip)
-- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.4/hidog-skill-1.2.4.zip.sha256)
+- [HiDOG Skill 1.2.5 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip)
+- [SHA256](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip.sha256)
 
 用客户端现有下载工具保存两个文件到新的临时目录。计算 ZIP 的 SHA256，并与摘要文件第一列的64位十六进制值比较；不一致立即停止，不绕过验证。校验后解压完整内容，阅读其中 `hidog/SKILL.md` 和将要运行的安装脚本。
 
-这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.4，分析核心固定为v11.2.0-rc.4，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
+这个包对 Codex 和 Claude Code 完全相同。Skill 版本为1.2.5，分析核心固定为v11.2.0-rc.4，核心下载仍由已有安装器完成。安装器访问 GitHub、conda-forge、bioconda、PyPI，不从核心源码安装，不要求用户提供API密钥。
 
 ## 3. 注册 Skill 并安装、自测
 
@@ -45,7 +45,7 @@ Windows 入口只在当前进程允许运行随包脚本，不修改全局执行
 - 如果宿主自带 Skill 安装器已经指定其他目录（例如此版本 Codex 的 `$CODEX_HOME/skills`），复用该目录，给安装器传 `--skills-dir '/已确认的技能父目录'` 或 `-SkillsDir 'C:\已确认的技能父目录'`；不要再安装重复副本。
 - 也可由宿主原生 Skill 安装器直接安装公开仓库的 `hidog/`，随后从已安装目录运行 `bash scripts/agent.sh setup` 或 Windows 的 `scripts/agent.ps1 -Action setup`。只下载说明文件不算安装完成。
 - 其他能加载标准 Skill 的 Agent 可以使用同一 `hidog/`；只有确认它的技能目录/导入机制与本地执行能力后才注册，不猜测 WorkBuddy 或豆包的内部配置路径。客户端只能上传 ZIP 时使用其导入流程；普通聊天无法靠本文件增加执行权限。
-- 相同内容的已安装 Skill 会复用；不同内容、链接或用户修改会保留并报错。报告冲突位置，不擅自覆盖用户修改。
+- 相同内容的已安装 Skill 会复用；不同内容先备份到同级 hidog-backup 目录再安装。链接或不安全路径保留并报错，用户修改保存在备份中。
 
 ## 4. 必须验证后再交付
 
@@ -59,4 +59,4 @@ Windows 入口只在当前进程允许运行随包脚本，不修改全局执行
 
 ## 已有版本升级
 
-用户已明确要求升级时，先确认无分析在运行并记录旧核心入口，比较/备份用户Skill目录，保留用户修改；不要用覆盖冲突的方式升级。将新Skill注册到原客户端的同一已确认目录后，按[已有安装升级步骤](hidog/references/usage.md#已有安装的明确升级)显式安装v11.2.0-rc.4并setup。普通setup会复用已有核心，不能仅看到11.2.0就声称已切换rc.4；须核对实际版本目录、VERSION、build-metadata.json和SELFTEST PASS。旧rc.3及结果保留。
+用户已明确要求升级时，先确认无分析在运行并记录旧核心入口，比较/备份用户Skill目录，保留用户修改；不要用覆盖冲突的方式升级。将新Skill注册到原客户端的同一已确认目录后，按[已有安装升级步骤](hidog/references/usage.md#已有安装的明确升级)显式安装v11.2.0-rc.4并setup。每次更新Skill后执行setup，按固定版本核验并在需要时保留旧核心、安装和切换新核心，不能仅看到11.2.0就声称已切换rc.4；须核对实际版本目录、VERSION、build-metadata.json和SELFTEST PASS。旧rc.3及结果保留。
