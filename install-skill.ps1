@@ -36,7 +36,12 @@ if (Test-Path -LiteralPath $target) {
         throw "Existing skill is linked; preserved: $target"
     }
     if ((Get-SkillManifest $source) -ne (Get-SkillManifest $target)) {
-        throw "Existing skill differs; preserved: $target"
+        $backup = Join-Path $SkillsDir ('hidog-backup-' + [Guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $backup | Out-Null
+        Move-Item -LiteralPath $target -Destination (Join-Path $backup 'hidog')
+        New-Item -ItemType Directory -Path $target | Out-Null
+        Get-ChildItem -LiteralPath $source -Force | Copy-Item -Destination $target -Recurse
+        Write-Output "Previous skill preserved: $backup\hidog"
     }
 } else {
     New-Item -ItemType Directory -Path $target | Out-Null

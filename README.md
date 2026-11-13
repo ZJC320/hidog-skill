@@ -14,8 +14,8 @@ Agent 请读取 [统一自动安装入口](INSTALL.md)。其他客户端必须�
 
 ## 下载与安装
 
-- [直接下载 HiDOG Skill 1.2.4 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.4/hidog-skill-1.2.4.zip)
-- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.4/hidog-skill-1.2.4.zip.sha256)
+- [直接下载 HiDOG Skill 1.2.5 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip)
+- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip.sha256)
 - [编译 CLI v11.2.0-rc.4](https://github.com/ZJC320/hidog-skill/releases/download/v11.2.0-rc.4/hidog-v11.2.0-rc.4-linux-x86_64.tar.gz) · [CLI SHA256](https://github.com/ZJC320/hidog-skill/releases/download/v11.2.0-rc.4/hidog-v11.2.0-rc.4-linux-x86_64.tar.gz.sha256)
 
 解压后使用统一安装器，同时安装 Skill、HiDOG 程序和报告依赖，并执行自测。
@@ -24,11 +24,11 @@ Linux/WSL：`bash install-skill.sh --client codex`；Claude Code 将 codex 换�
 
 Windows：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-skill.ps1 -Client codex`。多 WSL 发行版使用已确认的 `-Distro`。详细要求见 [INSTALL.md](INSTALL.md)。
 
-已有不同版本 Skill 会保留并提示冲突；升级时先比较并备份旧目录，再用新包安装，避免丢失用户修改。程序环境可复用，旧结果不会被覆盖。
+统一安装器会备份已有不同版本 Skill，随后安装新 Skill 并执行 setup。核心按固定版本核验、升级，旧核心和旧结果保留。
 
 ## 用户提供什么、得到什么
 
-按 [输入规范](hidog/references/input-format.md) 提供 paired FASTQ、未编辑参考、barcode、实验布局及模式设计；按孔报告另附样品—板—孔对应表。Agent 会集中询问缺失信息并检查格式。
+按 [输入规范](hidog/references/input-format.md) 提供 paired FASTQ、未编辑参考、barcode、实验布局及模式设计；按孔报告另附样品—板—孔对应表。标准 Hi-TOM 自动加载内置 96 孔 barcode 与结构，并抽样核验 reads；整理参考序列后展示计划，用户确认再分析。
 
 分析完成生成 HTML 报告、TSV 数值和 PNG/SVG 编辑频率图，包括建库/测序诊断、每孔 reads 分配、少于 1000 read pairs 提醒、每目标有效分析量、A/B/D 比例和偏倚提示。A/B/D 预期必须依据实验确认。UMI family 结果独立呈现，统计口径见 [报告说明](hidog/references/reporting.md)。
 

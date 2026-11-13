@@ -179,7 +179,7 @@ def collect(root, sample_sheet=None, abd_design=None, preflight=None):
     if preflight_data and preflight_data['fastq']['pairs'] != raw_total:
         raise ValueError('Preflight raw pair count differs from this analysis')
     sources.extend(Path(p) for p in [sample_sheet, abd_design, preflight] if p)
-    return {'created_utc': datetime.now(timezone.utc).isoformat(), 'skill_version': '1.2.4',
+    return {'created_utc': datetime.now(timezone.utc).isoformat(), 'skill_version': '1.2.5',
             'run_root': str(root), 'samples': samples, 'editing': editing, 'assignment': assignment,
             'abd': abd, 'abd_design': designs, 'family': family,
             'library': {'raw_pairs': raw_total, 'split_pairs': split_total,
@@ -260,7 +260,7 @@ def render(data, output):
     lib = data['library']
     parts = ['<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>HiDOG 分析报告</title>',
              '<style>body{font:15px system-ui;max-width:1200px;margin:40px auto;padding:0 20px;color:#17313b}h1,h2{color:#126c80}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border:1px solid #d7e1e5;padding:8px;text-align:left}th{background:#eef5f7}img{max-width:100%}.note{padding:14px;background:#fff5df}</style>',
-             '<h1>HiDOG 分析报告</h1><p>' + html.escape(data['created_utc']) + ' · Skill 1.2.4 · hard-only</p>',
+             '<h1>HiDOG 分析报告</h1><p>' + html.escape(data['created_utc']) + ' · Skill 1.2.5 · hard-only</p>',
              '<p class="note">本批 ' + str(len(data['samples'])) + ' 个样品；'
              + str(sum(bool(r['warning']) for r in data['samples'])) + ' 个拆样深度低于 1000 对；'
              + str(sum(r['status'] == '疑似扩增或分配偏倚' for r in data['abd'])) + ' 个样品×目标组合提示疑似偏倚。'

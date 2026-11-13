@@ -25,7 +25,15 @@ esac
 target="$skills/hidog"
 [[ ! -L "$target" ]] || fail "Existing skill is a symlink; preserved: $target"
 if [[ -e "$target" ]]; then
-  diff -qr "$base/hidog" "$target" >/dev/null || fail "Existing skill differs; preserved: $target"
+  if ! diff -qr "$base/hidog" "$target" >/dev/null; then
+    [[ -d "$target" ]] || fail "Existing target is not a directory: $target"
+    [[ -z "$(find "$target" -type l -print -quit)" ]] || fail 'Linked skill contents are preserved'
+    backup=$(mktemp -d "$skills/hidog-backup.XXXXXXXX")
+    mv "$target" "$backup/hidog"
+    mkdir "$target"
+    cp -R "$base/hidog/." "$target/"
+    printf 'Previous skill preserved: %s/hidog\n' "$backup"
+  fi
 else
   mkdir -p "$skills"
   mkdir "$target"

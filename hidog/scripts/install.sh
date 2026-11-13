@@ -20,7 +20,7 @@ done
 [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+\.[0-9]+)?$ ]] || fail 'Invalid version'
 [[ "$prefix" == /* && "$prefix" != / ]] || fail 'prefix must be an absolute user directory'
 [[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 ]] || fail 'Requires Linux/WSL x86_64'
-for tool in curl tar sha256sum awk grep mktemp realpath getconf; do
+for tool in curl tar sha256sum awk grep mktemp realpath getconf flock readlink; do
   command -v "$tool" >/dev/null || fail "Missing prerequisite: $tool"
 done
 glibc=$(getconf GNU_LIBC_VERSION 2>/dev/null) || fail 'Requires a glibc Linux system'
@@ -29,7 +29,10 @@ awk -v v="$glibc" 'BEGIN {split(v,a,"."); exit !(a[1]>2 || (a[1]==2 && a[2]>=31)
 prefix=$(realpath -m "$prefix")
 [[ "$prefix" != / && "$prefix" != *$'\n'* ]] || fail 'Unsafe installation prefix'
 destination="$prefix/$version"
-[[ ! -e "$destination" && ! -L "$destination" ]] || fail "Version directory exists: $destination; use its bin/hidog or choose a new prefix"
+mkdir -p "$prefix"
+exec 9>"$prefix/.install.lock"
+flock -n 9 || fail 'Another installation is active; retry when it completes'
+[[ ! -L "$destination" ]] || fail "Version directory is a symlink; preserved: $destination"
 if [[ -e "$prefix/bin/hidog" || -L "$prefix/bin/hidog" ]]; then
   [[ -L "$prefix/bin/hidog" ]] || fail "Refusing to replace existing file: $prefix/bin/hidog"
   case "$(readlink "$prefix/bin/hidog")" in
@@ -37,7 +40,23 @@ if [[ -e "$prefix/bin/hidog" || -L "$prefix/bin/hidog" ]]; then
     *) fail 'Existing launcher points outside this installation prefix' ;;
   esac
 fi
-mkdir -p "$prefix"
+activate() {
+  mkdir -p "$prefix/bin"
+  local link="$prefix/bin/.hidog-link-$$"
+  ln -s "$destination/bin/hidog" "$link"
+  mv -Tf "$link" "$prefix/bin/hidog"
+}
+verify_runtime() {
+  [[ -f "$destination/VERSION" && "$(cat "$destination/VERSION")" == "$version" ]] || return 1
+  [[ -x "$destination/bin/hidog" && -x "$destination/app/hidog.bin" && -x "$destination/bootstrap/micromamba" && -d "$destination/runtime" ]] || return 1
+  "$destination/bin/hidog" --version && "$destination/bin/hidog" vector-trace --help >/dev/null
+}
+if [[ -e "$destination" ]]; then
+  verify_runtime || fail "Existing release is incomplete or unhealthy; preserved: $destination"
+  activate
+  printf 'Verified and selected: %s\n' "$version"
+  exit 0
+fi
 download=$(mktemp -d "$prefix/.download.XXXXXXXX")
 trap 'echo "Installation failed; downloaded files/logs retained at: $download" >&2' ERR
 asset="hidog-${version}-linux-x86_64.tar.gz"
@@ -80,7 +99,6 @@ chmod 755 "$destination/bin/hidog"
 "$destination/bin/hidog" vector-trace --help >/dev/null
 "$destination/bootstrap/micromamba" --no-rc run -p "$destination/runtime" samtools --version > "$destination/tool-versions.txt"
 "$destination/bootstrap/micromamba" --no-rc run -p "$destination/runtime" trimmomatic -version >> "$destination/tool-versions.txt" 2>&1
-mkdir -p "$prefix/bin"
-ln -sfn "$destination/bin/hidog" "$prefix/bin/hidog"
+activate
 trap - ERR
 printf '\nInstalled: %s\nRun: %s --help\nLogs and downloads: %s\n' "$version" "$prefix/bin/hidog" "$download"
