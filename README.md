@@ -14,8 +14,8 @@ Agent 请读取 [统一自动安装入口](INSTALL.md)。其他客户端必须�
 
 ## 下载与安装
 
-- [直接下载 HiDOG Skill 1.2.5 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip)
-- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip.sha256)
+- [直接下载 HiDOG Skill 1.2.6 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.6/hidog-skill-1.2.6.zip)
+- [SHA256 校验文件](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.6/hidog-skill-1.2.6.zip.sha256)
 - [编译 CLI v11.2.0-rc.4](https://github.com/ZJC320/hidog-skill/releases/download/v11.2.0-rc.4/hidog-v11.2.0-rc.4-linux-x86_64.tar.gz) · [CLI SHA256](https://github.com/ZJC320/hidog-skill/releases/download/v11.2.0-rc.4/hidog-v11.2.0-rc.4-linux-x86_64.tar.gz.sha256)
 
 解压后使用统一安装器，同时安装 Skill、HiDOG 程序和报告依赖，并执行自测。

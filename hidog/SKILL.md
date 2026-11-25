@@ -7,7 +7,7 @@ description: 在 Linux 或 Windows WSL 安装并运行 HiDOG，检查扩增子�
 
 使用本地编译版 HiDOG 分析用户指定的数据。核心源码不随 Skill 分发。此包不依赖某个 agent 产品；不能执行终端命令时，提供可执行命令并说明尚未运行。
 
-公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.5 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.5/hidog-skill-1.2.5.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
+公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.6 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.6/hidog-skill-1.2.6.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
 
 ## 安装与运行环境
 
