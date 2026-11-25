@@ -41,7 +41,7 @@ Windows 多个 WSL 发行版时传 `-Distro '<已确认的名称>'` 并在后续
 
 ## 分析工作流
 
-FASTQ 分析前读取 [输入规范与模板](references/input-format.md)，收集缺失实验信息；使用 `agent.sh analyze [报告选项] -- <原 CLI 参数>` 或 Windows 的 `-Action analyze` 完成校验、分析和报告。原 `run` 保留为兼容核心入口，不自动生成增强报告；不能用它替代正常 FASTQ 工作流而漏交付报告。
+FASTQ 分析前读取 [输入规范与模板](references/input-format.md)，并参考 [跨文库分析经验](references/analysis-experience.md)：先验证文库构成与参考，再选择分析模式；异常先做小规模诊断，不用参数硬压。收集缺失实验信息；使用 `agent.sh analyze [报告选项] -- <原 CLI 参数>` 或 Windows 的 `-Action analyze` 完成校验、分析和报告。原 `run` 保留为兼容核心入口，不自动生成增强报告；不能用它替代正常 FASTQ 工作流而漏交付报告。
 
 结束时读取 [报告口径](references/reporting.md)，交付 HTML、TSV 和 PNG/SVG：建库诊断、每孔拆样 pairs 及全库比例、少于 1000 对警告、每目标有效量、A/B/D 分配及编辑频率图。A/B/D 预期不明或深度不足时标记未评估，不能默认实验必须 1:1:1。
 

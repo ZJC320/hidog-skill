@@ -28,7 +28,7 @@ Windows：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-ski
 
 ## 用户提供什么、得到什么
 
-按 [输入规范](hidog/references/input-format.md) 提供 paired FASTQ、未编辑参考、barcode、实验布局及模式设计；按孔报告另附样品—板—孔对应表。标准 Hi-TOM 自动加载内置 96 孔 barcode 与结构，并抽样核验 reads；整理参考序列后展示计划，用户确认再分析。
+按 [输入规范](hidog/references/input-format.md) 提供 paired FASTQ、未编辑参考、barcode、实验布局及模式设计；按孔报告另附样品—板—孔对应表。标准 Hi-TOM 自动加载内置 96 孔 barcode 与结构，并抽样核验 reads；整理参考序列后展示计划，用户确认再分析。跨文库的判断规则（构成验证、参考 QC、模式选择、深度/EF 解读、异常决策）见 [跨文库分析经验](hidog/references/analysis-experience.md)。
 
 分析完成生成 HTML 报告、TSV 数值和 PNG/SVG 编辑频率图，包括建库/测序诊断、每孔 reads 分配、少于 1000 read pairs 提醒、每目标有效分析量、A/B/D 比例和偏倚提示。A/B/D 预期必须依据实验确认。UMI family 结果独立呈现，统计口径见 [报告说明](hidog/references/reporting.md)。
 
