@@ -7,7 +7,11 @@ import json
 import math
 from pathlib import Path
 
+from experience_qc import sample_reference_review
 from input_checks import count_pairs, read_barcodes, read_sample_sheet
+
+
+REPORT_VERSION = '1.2.7'
 
 
 def table(path):
@@ -37,6 +41,9 @@ def assess_abd(counts, design):
         raise ValueError('A/B/D min_pairs must be positive and max_fold must exceed 1')
     if sum(counts) < design['min_pairs']:
         result['status'] = '未评估：分配深度不足'
+        return result
+    if 0 in counts:
+        result['status'] = '未评估：有亚基因组无明确归属'
         return result
     normalized = [count / ratio for count, ratio in zip(counts, expected)]
     fold = max(normalized) / min(normalized) if min(normalized) else None
@@ -101,11 +108,16 @@ def collect(root, sample_sheet=None, abd_design=None, preflight=None):
                 'warning': 'LOW_READS(<1000)' if count < 1000 else ''}
                for sample, count in counts.items()]
     editing, seen = [], set()
+    review = []
     paths = sorted(root.glob('*_summary_by_reference/*.stats.tsv'))
     for path in paths:
         if path.name.endswith('.hard_plus_rescued.stats.tsv'):
             continue
         sources.append(path)
+        allele_path = path.with_name(path.name[:-len('.stats.tsv')] + '.tsv')
+        if allele_path.is_file():
+            sources.append(allele_path)
+        review.extend(sample_reference_review(path, counts))
         for row in table(path):
             key = row['Sample'], row['Reference']
             if key in seen or key[0] not in counts:
@@ -179,7 +191,9 @@ def collect(root, sample_sheet=None, abd_design=None, preflight=None):
     if preflight_data and preflight_data['fastq']['pairs'] != raw_total:
         raise ValueError('Preflight raw pair count differs from this analysis')
     sources.extend(Path(p) for p in [sample_sheet, abd_design, preflight] if p)
-    return {'created_utc': datetime.now(timezone.utc).isoformat(), 'skill_version': '1.2.6',
+    return {'created_utc': datetime.now(timezone.utc).isoformat(), 'skill_version': REPORT_VERSION,
+            'review': review, 'input_qc': {key: (preflight_data or {}).get(key) for key in
+                                         ('guide_sites', 'supplier_checksums', 'layout_check')},
             'run_root': str(root), 'samples': samples, 'editing': editing, 'assignment': assignment,
             'abd': abd, 'abd_design': designs, 'family': family,
             'library': {'raw_pairs': raw_total, 'split_pairs': split_total,
@@ -218,6 +232,12 @@ def display_table(rows):
               'frequency_percent': '编辑频率 %', 'status': '结论', 'expected': '预期 A:B:D',
               'max_normalized_fold': '归一化最大/最小', 'scope': '统计范围', 'support': '支持情况',
               'assigned_families': '有效 families', 'edited_families': '编辑 families'}
+    labels.update({'group_bwa_qnames': '目标组 BWA qnames', 'hard_assigned': '本参考明确归属',
+                   'official_percent': '正式编辑频率 %', 'depth_note': '深度提醒', 'top_ties': '并列主等位数',
+                   'allele_class': '展示等位类型', 'window_event': '窗口内事件（原表）', 'allele_pairs': '该等位支持数',
+                   'display_ratio': '原表展示比例', 'sequence': '代表序列', 'guide': 'guide', 'strand': '方向',
+                   'start_1based': '起点（1起算）', 'end_1based': '终点（含）', 'exact_hits': '双链精确命中数',
+                   'pam_status': 'PAM 核对', 'file': '文件', 'status': '状态'})
     return '<div class="scroll"><table><tr>' + ''.join('<th>' + cell(labels.get(k, k)) + '</th>' for k in keys) + '</tr>' + ''.join(
         '<tr>' + ''.join('<td>' + cell(row.get(k)) + '</td>' for k in keys) + '</tr>' for row in rows) + '</table></div>'
 
@@ -257,10 +277,14 @@ def render(data, output):
     for key in ['samples', 'assignment', 'editing', 'abd', 'family']:
         write_table(output / (key + '.tsv'), data[key])
     (output / 'report.json').write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
+    qc = data.get('input_qc', {})
+    review = data.get('review', [])
+    write_table(output / 'sample_reference_review.tsv', review)
+    write_table(output / 'guide_sites.tsv', qc.get('guide_sites') or [])
     lib = data['library']
     parts = ['<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>HiDOG 分析报告</title>',
              '<style>body{font:15px system-ui;max-width:1200px;margin:40px auto;padding:0 20px;color:#17313b}h1,h2{color:#126c80}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border:1px solid #d7e1e5;padding:8px;text-align:left}th{background:#eef5f7}img{max-width:100%}.note{padding:14px;background:#fff5df}</style>',
-             '<h1>HiDOG 分析报告</h1><p>' + html.escape(data['created_utc']) + ' · Skill 1.2.6 · hard-only</p>',
+             '<h1>HiDOG 分析报告</h1><p>' + html.escape(data['created_utc']) + ' · Skill ' + html.escape(data['skill_version']) + ' · hard-only</p>',
              '<p class="note">本批 ' + str(len(data['samples'])) + ' 个样品；'
              + str(sum(bool(r['warning']) for r in data['samples'])) + ' 个拆样深度低于 1000 对；'
              + str(sum(r['status'] == '疑似扩增或分配偏倚' for r in data['abd'])) + ' 个样品×目标组合提示疑似偏倚。'
@@ -270,12 +294,20 @@ def render(data, output):
              display_table([{'metric': k, 'count': v} for k, v in lib['barcode_qc'].items()]),
              display_table([lib['input_quality']] if lib['input_quality'] else []),
              '<p>Q30/N 指标来自原始 FASTQ 全量检查；未进行预检查时标为无数据。没有实验验收阈值时不自动标记整批建库“合格”。</p>',
+             '<h3>输入文件与建库布局</h3>', display_table(qc.get('supplier_checksums') or []),
+             '<pre>' + html.escape(json.dumps(qc.get('layout_check'), ensure_ascii=False, indent=2)
+                                   if qc.get('layout_check') else '未提供模板诊断') + '</pre>',
+             '<h3>参考与 guide 核对</h3><p>按原始参考正向坐标列出输入 guide 的双链精确命中；多 guide 时逐组合展示。PAM 按 guide 方向读取，NGG 仅作标准 SpCas9 提示。该表不改变核心绑定。</p>',
+             display_table(qc.get('guide_sites') or []),
              '<h2>2. 每样品/每孔 reads 分配</h2><p>一个 R1/R2 pair 计一次。library_split_percent 的分母是本批全部拆样保留 pairs；raw_library_percent 的分母是原始 pairs。所有空孔仍保留，低于 1000 对警告，等于 1000 不警告。</p>',
              display_table(data['samples']), '<h2>3. 最终可用于编辑分析的 reads</h2>', display_table(data['assignment']),
              '<h2>4. A/B/D 分配与偏倚提示</h2><p>A/B/D 百分比的分母为同样品、同目标组 A+B+D 最终 hard-only pairs；不是全库比例。未确认预期比例、参考对应或深度不足时不判断偏倚。</p>',
              display_table(data['abd']), '<p>本次判定配置：</p><pre>' + html.escape(json.dumps(data['abd_design'], ensure_ascii=False, indent=2)) + '</pre>',
              '<h2>5. 样品编辑频率</h2><p>按样品×参考绘图；分母为最终 assigned pairs，Modified 为分子，零分母或正式统计标为 NA 时显示 NA。总编辑频率不等于 dualPE 完整精准编辑效率。</p>',
-             display_table(data['editing'])]
+             display_table(data['editing']),
+             '<h3>逐样品深度与支持最多的已展示等位</h3><p>目标组 BWA 计数在各参考重复显示，不跨参考相加。正式频率来自 Stats；展示比例沿用原生 Summary 的展示分母。并列时逐行列出，勿累加重复的样品统计。NA 保留原义。深度提醒仅用于复核。</p>',
+             '<a href="sample_reference_review.tsv">下载逐样品明细及代表序列</a>',
+             display_table([{k: v for k, v in r.items() if k != 'sequence'} for r in review])]
     if data['family']:
         parts.extend(['<h2>UMI family 结果（独立统计）</h2><p>terminal UMI family 不等于原始 DNA molecule；不把 reads 阈值 1000 套用于 family 数。</p>', display_table(data['family'])])
     for name, ref, kind in figures:

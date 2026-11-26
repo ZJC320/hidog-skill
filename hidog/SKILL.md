@@ -5,9 +5,11 @@ description: 在 Linux 或 Windows WSL 安装并运行 HiDOG，检查扩增子�
 
 # HiDOG
 
+本版新增输入核查、逐样品与逐参考明细，以及交付目录校验。
+
 使用本地编译版 HiDOG 分析用户指定的数据。核心源码不随 Skill 分发。此包不依赖某个 agent 产品；不能执行终端命令时，提供可执行命令并说明尚未运行。
 
-公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.6 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.6/hidog-skill-1.2.6.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
+公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.7 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.7/hidog-skill-1.2.7.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
 
 ## 安装与运行环境
 
@@ -43,6 +45,10 @@ Windows 多个 WSL 发行版时传 `-Distro '<已确认的名称>'` 并在后续
 
 FASTQ 分析前读取 [输入规范与模板](references/input-format.md)，并参考 [跨文库分析经验](references/analysis-experience.md)：先验证文库构成与参考，再选择分析模式；异常先做小规模诊断，不用参数硬压。收集缺失实验信息；使用 `agent.sh analyze [报告选项] -- <原 CLI 参数>` 或 Windows 的 `-Action analyze` 完成校验、分析和报告。原 `run` 保留为兼容核心入口，不自动生成增强报告；不能用它替代正常 FASTQ 工作流而漏交付报告。
 
+准备时展示逐参考 guide 精确命中、方向及适用的 PAM；多命中、无命中和参考边界不足逐项标注。比对同目录 MD5.txt 对 R1/R2 给出的校验值。模板检查失败先读准备目录的 layout_check.json，明确采用其他布局的依据后重新准备。
+
+报告内按样品×参考列出拆样量、目标组 BWA qnames、本参考明确归属、Modified、正式频率和支持最高的已展示等位；并列全部保留。遇到混合池或大量已比对而未归属，仅在有候选参考及实验依据时做构成诊断，并记录范围。不得自动改参考、改分母或把 QC 提醒当作生物学结论。
+
 结束时读取 [报告口径](references/reporting.md)，交付 HTML、TSV 和 PNG/SVG：建库诊断、每孔拆样 pairs 及全库比例、少于 1000 对警告、每目标有效量、A/B/D 分配及编辑频率图。A/B/D 预期不明或深度不足时标记未评估，不能默认实验必须 1:1:1。
 
 - 确认用户目的、分析模式、输入文件、输出目录及线程资源。缺少会影响正确性的实验参数时询问；不能根据默认值猜测 barcode、bridge、UMI 布局或编辑工具。
@@ -68,6 +74,7 @@ clean-result/
 
 - 按 [报告整理与清理步骤](references/reporting.md#clean-result-整理与清理) 执行：先完成所有报告、整理四类最终结果、验证内容与链接，再直接删除本次运行的其他中间文件；不能只隐藏文件或另存一份 clean-result 后仍保留整套中间产物。
 - 增强报告、编辑图、UMI 最终统计及必要的解释性审计先归入上述目录，不因原存放位置在其他目录而漏交付或误删。不得将 BAM、拆样 FASTQ 等中间产物搬进保留目录规避清理。
+- FASTQ read-level 交付整理后，在清理源文件前运行 `bash scripts/agent.sh verify-delivery /实际路径/clean-result`，Windows 入口使用 `-Action verify-delivery`。检查失败时保留现场。
 - 删除仅限本次任务新建且明确归属本次运行的工作目录内、已经确认不再被最终报告依赖的产物；核实绝对路径范围，不跟随符号链接删除外部内容。原始输入、程序/环境、历史结果及其他任务文件不属于清理对象。
 - 分析失败、进程仍在运行、报告缺失或校验失败时不清理，保留排错文件并说明实际状态。清理失败则报告未完成项，不宣称已经完成 clean-result 交付。
 - 当前 `analyze` 生成报告后，由调用 Skill 的 Agent 执行此收尾规则；直接调用底层 CLI 不等于已自动清理。用户最终只收到 clean-result 路径及其内的报告链接。此次规则变更不追溯删除已有结果。

@@ -31,3 +31,6 @@ manifest 设置 `library_method: "Hi-TOM"` 时自动选择内置标准96孔预�
 确认使用标准无 UMI 原始 Hi-TOM reads 时，核实的普通结构为4 nt前置 spacer、4 nt barcode、1 nt后置 spacer、18 nt bridge。其准确CLI映射为 spacer-length=4、barcode-length=4、post-barcode-spacer-length=1、bridge-length=18、umi-mode=off。**只适用于未被剪切且与该标准相符的 reads**；套用前仍须抽样核对实际结构。加载器校验表的哈希和格式，并抽查每端前1000条reads的前置/间隔/bridge；精确匹配不足80%时停止并要求澄清。80%是保守输入检查门槛，不是HiDOG分析参数，也不是自动识别其它文库结构的算法。标准96孔表由原论文补充表S1/S2核对的barcode序列生成，随此候选提供；不能使用合成示例表替代。profile 中已有布局时 arguments 不得再次覆盖。
 
 准备清单固定真实版本目录中的程序入口，并校验该版本的 launcher、VERSION、build-metadata.json 和核心二进制（存在时）。之后更新 Skill 切换全局入口不会改变已准备任务的核心版本；要采用新版需重新准备并确认。
+
+
+模板预检保存 layout_check.json，记录两端的精确结构命中与样本量，另列允许一处差异时的 post+bridge 最佳偏移（从零起算，最优位置并列单列）。前者决定原有模板门限；后者仅作解释。若同批输入经核实改用显式布局，准备清单可用 layout_diagnostic 指向该诊断文件、layout_basis 写明实验依据，同时移除 profile 和 library_method 并显式传入实际布局。核对计划后再运行。

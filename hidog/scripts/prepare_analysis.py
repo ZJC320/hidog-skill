@@ -73,7 +73,7 @@ def load_profile(path):
     return arguments
 
 
-def check_read_motifs(r1, r2, profile):
+def motif_evidence(r1, r2, profile):
     from input_checks import fastq_records
     from itertools import islice
     result = {}
@@ -82,14 +82,24 @@ def check_read_motifs(r1, r2, profile):
         motif = profile['read_motifs'][mate]
         barcode_end = layout['spacer-length'] + layout['barcode-length']
         checked = matched = 0
+        offsets = {}
+        expected = motif['post'] + motif['bridge']
         for _, seq, _, _ in islice(fastq_records(path), 1000):
             checked += 1
-            matched += int(seq.startswith(motif['prefix']) and
-                           seq[barcode_end:].startswith(motif['post'] + motif['bridge']))
-        result[mate] = {'sampled': checked, 'exact_structure_matches': matched}
-        # Conservative intake warning gate, not a core analytical threshold.
-        if not checked or matched / checked < 0.8:
-            raise ValueError(f'{mate} does not confidently match the selected raw-read profile; clarify trimming/library variant before analysis ({matched}/{checked})')
+            matched += int(seq.startswith(motif['prefix']) and seq[barcode_end:].startswith(expected))
+            candidates = []
+            for pos in range(max(0, barcode_end - 3), min(len(seq) - len(expected), barcode_end + 4) + 1):
+                distance = sum(a != b for a, b in zip(seq[pos:pos + len(expected)], expected))
+                if distance <= 1:
+                    candidates.append((distance, pos))
+            if candidates:
+                best = min(x[0] for x in candidates)
+                positions = [pos for distance, pos in candidates if distance == best]
+                key = str(positions[0]) if len(positions) == 1 else '并列'
+                offsets[key] = offsets.get(key, 0) + 1
+        result[mate] = {'sampled': checked, 'exact_structure_matches': matched,
+                        'passes_80_percent': bool(checked and matched / checked >= 0.8),
+                        'post_bridge_le1_offsets_0based': offsets}
     return result
 
 
@@ -124,10 +134,28 @@ def prepare(manifest, directory):
     help_text = subprocess.check_output([str(launcher), '--help'], text=True)
     check_full_options(arguments, help_text)
     args, audit = preflight(arguments, manifest.get('sample_sheet'), manifest.get('abd_design'))
+    fastq_hashes = {}
     if manifest.get('profile'):
         profile = json.loads(Path(manifest['profile']).read_text(encoding='utf-8'))
         if profile.get('read_motifs'):
-            audit['profile_structure_sample'] = check_read_motifs(args.read1, args.read2, profile)
+            evidence = motif_evidence(args.read1, args.read2, profile)
+            audit['profile_structure_sample'] = evidence
+            fastq_hashes = {str(path.resolve()): digest(path) for path in (args.read1, args.read2)}
+            audit['layout_check'] = {'profile': profile['version'], 'mates': evidence,
+                                     'fastq_sha256': fastq_hashes}
+            (directory / 'layout_check.json').write_text(
+                json.dumps(audit['layout_check'], ensure_ascii=False, indent=2), encoding='utf-8')
+            if not all(row['passes_80_percent'] for row in evidence.values()):
+                raise ValueError(f'Profile exact structure below 80%; inspect {directory / "layout_check.json"}')
+    elif manifest.get('layout_diagnostic'):
+        diagnostic_path = Path(manifest['layout_diagnostic'])
+        diagnostic = json.loads(diagnostic_path.read_text(encoding='utf-8'))
+        fastq_hashes = {str(path.resolve()): digest(path) for path in (args.read1, args.read2)}
+        if diagnostic.get('fastq_sha256') != fastq_hashes:
+            raise ValueError('Layout diagnostic belongs to different FASTQ inputs')
+        if not manifest.get('layout_basis'):
+            raise ValueError('Explicit layout after diagnosis needs a documented layout_basis')
+        audit['layout_check'] = {'comparison': diagnostic, 'explicit_layout_basis': manifest['layout_basis']}
     # Preserve exact argv, hash all declared input files plus every existing path argument.
     # Large FASTQ hashing is streaming; no raw reads enter the plan.
     files = {item['path'] for item in audit['inputs']}
@@ -143,13 +171,13 @@ def prepare(manifest, directory):
         p = Path(value)
         if p.is_absolute() and p.is_file():
             files.add(str(p.resolve()))
-    for key in ('sample_sheet', 'abd_design', 'profile'):
+    for key in ('sample_sheet', 'abd_design', 'profile', 'layout_diagnostic'):
         if manifest.get(key):
             files.add(str(Path(manifest[key]).resolve()))
     plan = {'schema': 1, 'library': library, 'launcher': str(resolved_launcher),
             'arguments': arguments, 'sample_sheet': manifest.get('sample_sheet'),
             'abd_design': manifest.get('abd_design'), 'audit': audit,
-            'files': {p: digest(p) for p in sorted(files)}}
+            'files': {p: fastq_hashes[p] if p in fastq_hashes else digest(p) for p in sorted(files)}}
     path = directory / 'plan.json'
     path.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding='utf-8')
     token = fingerprint(plan)
@@ -165,7 +193,7 @@ def run(plan_path, confirmed_digest):
         if digest(path) != expected:
             raise ValueError(f'Input changed; prepare and confirm again: {path}')
     command = [sys.executable, str(Path(__file__).with_name('analyze.py')),
-               '--launcher', plan['launcher']]
+               '--launcher', plan['launcher'], '--prepared-plan', str(plan_path)]
     for key in ('sample_sheet', 'abd_design'):
         if plan.get(key):
             command += ['--' + key.replace('_', '-'), plan[key]]

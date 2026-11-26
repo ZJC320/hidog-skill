@@ -33,7 +33,7 @@ def read_barcodes(path, length=None):
     return samples
 
 
-def read_fasta(paths):
+def read_fasta(paths, sequences=False):
     records = {}
     for path in paths:
         name, sequence = None, []
@@ -47,7 +47,7 @@ def read_fasta(paths):
                     raise ValueError(f'{path}: empty/non-ACGTN reference {name}')
                 if name in records:
                     raise ValueError(f'Duplicate reference ID: {name}')
-                records[name] = len(seq)
+                records[name] = seq.upper() if sequences else len(seq)
         for line in text.splitlines():
             if not line.strip():
                 continue

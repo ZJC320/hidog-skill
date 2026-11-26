@@ -22,7 +22,7 @@
 1. **建库诊断**：原始 pairs、全 read 的 R1/R2 Q30/N 比例、barcode 顺序过滤计数、拆样保留率。条码质量不是整条 read 质量；没有浓度、电泳或实验标准时不自动判整批建库合格。
 2. **样品/孔分配**：拆样保留 pairs、占全批拆样 pairs 的比例、占原始 pairs 的比例。低于 1000 对统一 `LOW_READS(<1000)`，包含零；1000 不警告。抽样运行须注明是抽样后的深度。没有板孔表时不猜孔位。
 3. **有效分析量**：样品×目标的最终 hard-only assigned pairs 及占本样品拆样量比例。不同目标可能共享 qname，不跨目标累计为独立总量；hard_plus_rescued 不与 hard-only 相加。
-4. **A/B/D**：取最终 Stats 的样品×目标×参考计数，分母为组内 A+B+D。参考和预期明确、深度足够时，按 expected 归一化比较最大/最小。零分量且总深度够时提示疑似偏倚；缺失统计行不能当零；零分母为 N/A。
+4. **A/B/D**：取最终 Stats 的样品×目标×参考计数，分母为组内 A+B+D。参考和预期明确、深度足够时，按 expected 归一化比较最大/最小。零分量时标记该参考无明确归属并暂停平衡判定；缺失统计行不能当零；零分母为 N/A。
 5. **编辑图**：尊重正式Stats的NA，包括assigned非零但频率不可用的情形，保持NA而不重算为数值；可用时每参考跨样品 `Modified / Assigned × 100%`，标注分母 n，最多 48 样品/页，输出 PNG+SVG。总编辑率不是 dualPE 完整精准编辑效率；继续检查 PE subtype / complete 审计。
 6. **UMI**：独立列出 eligible assigned families、edited families、频率与图，不混用 read-level，不把 terminal family 称为原始 molecule。
 
@@ -39,3 +39,10 @@
 ## Skill 1.2.6报告校验与时间
 
 完整读取/配对/质量校验不变，ASCII序列与质量的整串校验替代Python逐字符循环。ER19增强报告独立三次约37.58/37.69/37.01秒，reporting-1.2.0依赖不变；该时间不含核心分析，报告间未清缓存。分别记录核心、增强报告、复制校验耗时，不能用其中一项代表全部工作流。
+
+
+## 逐样品核查与交付验证
+
+主报告新增 guide 核对与逐样品明细。sample_reference_review.tsv 每行是一条并列最高的已展示等位；空样品保留空字段。事件、代表序列、展示比例照录对应参考的原生 TSV。正式频率沿用 Stats 的数值或 NA。组级 BWA 数会在多个参考栏重复；不能跨参考或并列等位求和。2000、5000 等经验深度不作为正式过滤条件。实验预期、污染对照或设计信息不足时标记未评估。PE 产物判读继续使用原生模式的专项统计。
+
+将原生 HTML 放在 html_reports/native_hidog 时，检查其相对 plots 路径；在新交付副本中将原来的 ../plots/ 指向 ../../plots/。运行 `bash scripts/agent.sh verify-delivery /实际路径/clean-result`；失败则修正本次拷贝和引用后重查。该命令检查 FASTQ read-level 交付、逐行 Stats 和本地资源，不删除文件。

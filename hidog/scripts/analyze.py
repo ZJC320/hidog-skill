@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 
+from experience_qc import guide_records, guide_sites, supplier_md5
 from input_checks import count_pairs, read_barcodes, read_fasta, read_sample_sheet
 from analysis_report import collect, percent, read_design, render
 
@@ -29,6 +30,8 @@ def preflight(arguments, sample_sheet=None, abd_design=None):
     parser.add_argument('-o', '--outdir', type=Path, required=True)
     parser.add_argument('-t', '--type', choices=['disjoint', 'overlap'], required=True)
     parser.add_argument('--editing-tool', '--nuclease', required=True)
+    parser.add_argument('-g', '--guide-seq', nargs='+', default=[])
+    parser.add_argument('--prime_editing_pegRNA_spacer_seq', nargs='+', default=[])
     for option in ['spacer-length', 'barcode-length', 'bridge-length', 'post-barcode-spacer-length']:
         parser.add_argument('--' + option, type=int, required=True)
     parser.add_argument('--umi-mode', choices=['off', 'dual-primer'], required=True)
@@ -53,7 +56,11 @@ def preflight(arguments, sample_sheet=None, abd_design=None):
     if not str(args.read1).endswith('.gz') or not str(args.read2).endswith('.gz'):
         raise ValueError('The analysis workflow requires paired gzip FASTQ (.fq.gz / .fastq.gz)')
     samples = read_barcodes(args.barcode, args.barcode_length)
-    refs = read_fasta(args.reference)
+    sequences = read_fasta(args.reference, sequences=True)
+    refs = {name: len(seq) for name, seq in sequences.items()}
+    guides = guide_records(args.guide_seq + args.prime_editing_pegRNA_spacer_seq)
+    matches = guide_sites(sequences, guides, args.editing_tool)
+    checksums = [supplier_md5(path) for path in (args.read1, args.read2)]
     metadata = read_sample_sheet(sample_sheet, samples)
     designs = read_design(abd_design)
     if any(set(design['references'].values()) - set(refs) for design in designs.values()):
@@ -66,6 +73,7 @@ def preflight(arguments, sample_sheet=None, abd_design=None):
         fastq[mate + '_Q30_percent'] = percent(fastq[mate + '_Q30_bases'], fastq[mate + '_bases'])
         fastq[mate + '_N_percent'] = percent(fastq[mate + '_N_bases'], fastq[mate + '_bases'])
     return args, {'checked_utc': datetime.now(timezone.utc).isoformat(), 'fastq': fastq,
+                  'guide_sites': matches, 'supplier_checksums': checksums,
                   'references': refs, 'samples': metadata, 'abd_design': designs,
                   'arguments': arguments,
                   'inputs': [{'path': str(p.resolve()), 'bytes': p.stat().st_size, 'mtime_ns': p.stat().st_mtime_ns}
@@ -77,6 +85,7 @@ def main():
     parser.add_argument('--launcher', type=Path, required=True)
     parser.add_argument('--sample-sheet', type=Path)
     parser.add_argument('--abd-design', type=Path)
+    parser.add_argument('--prepared-plan', type=Path)
     parser.add_argument('--validate-only', action='store_true')
     parser.add_argument('hidog_args', nargs=argparse.REMAINDER)
     options = parser.parse_args()
@@ -86,6 +95,12 @@ def main():
     help_text = subprocess.check_output([str(options.launcher), '--help'], text=True)
     check_full_options(arguments, help_text)
     args, audit = preflight(arguments, options.sample_sheet, options.abd_design)
+    if options.prepared_plan:
+        prepared = json.loads(options.prepared_plan.read_text(encoding='utf-8'))
+        if prepared['arguments'] != arguments:
+            raise ValueError('Prepared layout does not match run arguments')
+        if 'layout_check' in prepared['audit']:
+            audit['layout_check'] = prepared['audit']['layout_check']
     if options.validate_only:
         print(json.dumps(audit, ensure_ascii=False, indent=2))
         return 0
