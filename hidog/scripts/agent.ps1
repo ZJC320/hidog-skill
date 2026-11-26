@@ -1,7 +1,7 @@
 # Windows entry point. Linux execution always stays inside the selected WSL distro.
 [CmdletBinding()]
 param(
-    [ValidateSet('check', 'install', 'run', 'example', 'setup', 'analyze', 'validate', 'report', 'verify-delivery')][string]$Action = 'check',
+    [ValidateSet('check', 'install', 'run', 'example', 'setup', 'analyze', 'validate', 'report', 'verify-delivery', 'run-plan')][string]$Action = 'check',
     [string]$Distro,
     [string]$Prefix,
     [string[]]$HidogArgs = @()

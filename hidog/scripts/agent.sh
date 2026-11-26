@@ -64,6 +64,8 @@ case "$action" in
     options=()
     [[ "$action" != validate ]] || options+=(--validate-only)
     exec "$python" "$base/scripts/analyze.py" --launcher "$launcher" "${options[@]}" "$@" ;;
+  run-plan)
+    exec "$prefix/reporting-1.2.0/bin/python" "$base/scripts/prepare_analysis.py" run "$@" ;;
   verify-delivery)
     exec "$prefix/reporting-1.2.0/bin/python" "$base/scripts/verify_delivery.py" "$@" ;;
   report)
@@ -86,5 +88,5 @@ case "$action" in
       --prime_editing_pegRNA_extension_seq "$base/examples/extensions.fa" \
       --prime_editing_override_prime_edited_ref_seq "$base/examples/expected.fa" \
       --min-genotype-depth 1 --min-ratio 0 ;;
-  *) fail 'Action must be setup, check, install, analyze, validate, report, verify-delivery, run or example' ;;
+  *) fail 'Action must be setup, check, install, analyze, validate, report, verify-delivery, run-plan, run or example' ;;
 esac

@@ -34,3 +34,16 @@ manifest 设置 `library_method: "Hi-TOM"` 时自动选择内置标准96孔预�
 
 
 模板预检保存 layout_check.json，记录两端的精确结构命中与样本量，另列允许一处差异时的 post+bridge 最佳偏移（从零起算，最优位置并列单列）。前者决定原有模板门限；后者仅作解释。若同批输入经核实改用显式布局，准备清单可用 layout_diagnostic 指向该诊断文件、layout_basis 写明实验依据，同时移除 profile 和 library_method 并显式传入实际布局。核对计划后再运行。
+
+
+## Windows 中运行已确认的长任务
+
+终端或宿主支持持续前台会话时，用现有的 prepare_analysis.py run 前台执行直至报告写完。如果每次工具调用会很快返回，可在 Windows PowerShell 从本技能目录启动独立的 Windows 工作进程。以下变量分别指向本次已经确认的 plan.json 和对应的确认摘要。
+
+```powershell
+$job = & .\scripts\start-wsl-plan.ps1 -Distro Ubuntu-20.04 -Plan $planPath -ConfirmedPlan $confirmedDigest
+$job
+Get-Content -LiteralPath (Join-Path $job.jobDir 'stdout.log') -Tail 15
+```
+
+工作进程前台等待 wsl.exe 结束，并在 Windows 用户目录保存 stdout.log、stderr.log、exit-code.txt。不要在 Linux 命令后追加 & 或用 nohup 后立即退出客户端。返回 PID 仅代表已启动；退出码为零后检查任务记录、正式报告及交付结果。退出码不存在时检查该 PID 的开始时间与返回值、分析进程和日志。工作进程已消失而无退出码时标记中断，保留已有输出并排查宿主超时、WSL 关闭、内存、磁盘与休眠。避免自动重复提交。同一宿主若强制回收所有子进程，应改用独立打开的 PowerShell 终端前台运行已确认计划。成功完成的文库无需重跑。

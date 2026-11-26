@@ -11,7 +11,7 @@ from experience_qc import sample_reference_review
 from input_checks import count_pairs, read_barcodes, read_sample_sheet
 
 
-REPORT_VERSION = '1.2.7'
+REPORT_VERSION = '1.2.8'
 
 
 def table(path):

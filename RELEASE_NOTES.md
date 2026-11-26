@@ -1,3 +1,11 @@
+## HiDOG Skill 1.2.8 · Windows 后台运行 WSL 分析
+
+Windows Agent 可以用 `scripts/start-wsl-plan.ps1` 启动已经确认的分析计划。独立工作进程持续等待 WSL 命令结束，调用端可以先返回。启动回执包含 PID 和任务日志目录，任务结束后可读取退出码。
+
+- `run-plan` 沿用原有计划摘要和输入校验。
+- 核心版本为 `v11.2.0-rc.4`。
+- 强制关闭 WSL、主机重启或宿主回收整棵进程树仍可能中断任务。详细说明见 `hidog/references/prepare-confirm.md`。
+
 ## HiDOG Skill 1.2.7 · 输入核查与逐样品报告
 
 - 输入预检核对供方 MD5，记录 guide 在参考上的双链精确命中。Cas9 报告列出命中方向、坐标和 PAM。

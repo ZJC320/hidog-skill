@@ -5,11 +5,11 @@ description: 在 Linux 或 Windows WSL 安装并运行 HiDOG，检查扩增子�
 
 # HiDOG
 
-本版新增输入核查、逐样品与逐参考明细，以及交付目录校验。
+支持 Windows 独立工作进程执行已确认计划，以及输入核查、逐样品报告和交付目录校验。
 
 使用本地编译版 HiDOG 分析用户指定的数据。核心源码不随 Skill 分发。此包不依赖某个 agent 产品；不能执行终端命令时，提供可执行命令并说明尚未运行。
 
-公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.7 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.7/hidog-skill-1.2.7.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
+公开地址：[GitHub 仓库](https://github.com/ZJC320/hidog-skill) · [Agent 自动下载安装](https://github.com/ZJC320/hidog-skill/blob/main/INSTALL.md) · [Skill 1.2.8 ZIP](https://github.com/ZJC320/hidog-skill/releases/download/skill-v1.2.8/hidog-skill-1.2.8.zip)。安装须同时完成 Skill 注册、编译程序、报告环境及自测，仅复制说明不算完成。
 
 ## 安装与运行环境
 
@@ -56,6 +56,7 @@ FASTQ 分析前读取 [输入规范与模板](references/input-format.md)，并�
 - 检查输入存在、配对、命名关系、输出是否已存在；新分析使用新目录，不覆盖原始文件或旧结果。重跑/恢复先核对版本和输入参数。
 - 运行前展示模式、输入、输出、关键建库参数和资源；即使用户最初已授权分析，也必须在输入整理完成后等待用户对本次方案的明确确认，之后才启动分析；缺少关键参数时保留待确认。优先使用绝对路径和参数列表，正确引用含空格的路径。
 - 使用统一 `hidog` 入口传递原 CLI 参数。运行期间保留命令、程序版本、运行时间、日志、退出码及结果目录；成功交付时按下述 clean-result 规则整理和清理。大型集群任务遵守用户的调度规则，不在登录节点直接启动重分析。
+- Windows/WSL 的已确认计划应让 Windows 持续持有执行分析的 wsl.exe。Agent 短时调用需要返回时，从 Windows 运行 scripts/start-wsl-plan.ps1，记录返回的 jobDir 和 PID，再按 references/prepare-confirm.md 核实退出状态。
 - 长任务不要因为暂时没有新输出就重启。通过 agent 的进程管理能力或用户现有调度器查看进度；不能自行声称后台任务已完成。
 - 非零退出码报告为失败，列出具体日志原因和下一步。禁止悄悄放宽阈值、跳过失败样本或用源码版回退。
 - 完成后检查必要的 Stats、工作簿、QC、HTML/审计文件；汇总实际结果、失败样本、限制和本地文件位置。不要把 smoke test 或程序正常退出说成完整生物学验收。
